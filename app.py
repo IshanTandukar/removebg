@@ -17,7 +17,37 @@ def home():
 
 
 @app.route("/remove-bg", methods=["POST"])
+# def remove_bg():
+#     file = request.files["image"]
+
+#     input_path = os.path.join(upload_folder, file.filename)
+
+#     output_filename = f"output_{os.path.splitext(file.filename)[0]}.png"
+#     output_path = os.path.join(upload_folder, output_filename)
+
+#     file.save(input_path)
+
+#     input_image = Image.open(input_path)
+
+#     # Reduce image size to lower memory usage
+#     input_image.thumbnail((1024, 1024))
+
+#     # Use preloaded session
+#     output_image = remove(input_image, session=session)
+
+#     output_image.save(output_path)
+
+#     return render_template(
+#         "result.html",
+#         original=file.filename,
+#         processed=output_filename
+#     )
 def remove_bg():
+    global session
+
+    if session is None:
+        session = new_session("u2netp")
+
     file = request.files["image"]
 
     input_path = os.path.join(upload_folder, file.filename)
@@ -29,10 +59,8 @@ def remove_bg():
 
     input_image = Image.open(input_path)
 
-    # Reduce image size to lower memory usage
     input_image.thumbnail((1024, 1024))
 
-    # Use preloaded session
     output_image = remove(input_image, session=session)
 
     output_image.save(output_path)
@@ -42,6 +70,7 @@ def remove_bg():
         original=file.filename,
         processed=output_filename
     )
+
 
 
 @app.route("/download/<filename>")
