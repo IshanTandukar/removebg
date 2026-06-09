@@ -1,22 +1,71 @@
 from flask import Flask, render_template, request, send_file, send_from_directory
-from rembg import remove, new_session
+from rembg import remove
 from PIL import Image
 import os
 
-app = Flask(__name__)
+app=Flask(__name__)
 
-upload_folder = "uploads"
+upload_folder = 'uploads'
 os.makedirs(upload_folder, exist_ok=True)
 
-# Load model once when app starts
-session = new_session("u2netp")
-
-@app.route("/")
+@app.route('/')
 def home():
-    return render_template("index.html")
+    return render_template('index.html')
+
+@app.route('/remove-bg', methods=['POST'])
+def remove_bg():
+    file = request.files["image"]
+
+    input_path = os.path.join(upload_folder, file.filename)
+
+    output_filename = f"output_{os.path.splitext(file.filename)[0]}.png"
+    output_path = os.path.join(upload_folder, output_filename )
+    
+    file.save(input_path)
+
+    input_image = Image.open(input_path)
+    output_image = remove(input_image)
+    output_image.save(output_path)
+
+    # return send_file(output_path, as_attachment=True)
+    return render_template(
+        'result.html', 
+        original=file.filename, 
+        processed=output_filename
+        )
+
+@app.route('/download/<filename>')
+def download(filename):
+    path = os.path.join(upload_folder, filename)
+    return send_file(path, as_attachment=True)
+
+@app.route('/uploads/<filename>')
+def static_uploads(filename):
+    return send_from_directory(upload_folder, filename)
+
+if __name__ == '__main__':
+    app.run(debug=True)
 
 
-@app.route("/remove-bg", methods=["POST"])
+# from flask import Flask, render_template, request, send_file, send_from_directory
+# from rembg import remove, new_session
+# from PIL import Image
+# import os
+
+# app = Flask(__name__)
+
+# upload_folder = "uploads"
+# os.makedirs(upload_folder, exist_ok=True)
+
+# # Load model once when app starts
+# session = new_session("u2netp")
+
+# @app.route("/")
+# def home():
+#     return render_template("index.html")
+
+
+# @app.route("/remove-bg", methods=["POST"])
 # def remove_bg():
 #     file = request.files["image"]
 
@@ -42,96 +91,49 @@ def home():
 #         original=file.filename,
 #         processed=output_filename
 #     )
-def remove_bg():
-    global session
-
-    if session is None:
-        session = new_session("u2netp")
-
-    file = request.files["image"]
-
-    input_path = os.path.join(upload_folder, file.filename)
-
-    output_filename = f"output_{os.path.splitext(file.filename)[0]}.png"
-    output_path = os.path.join(upload_folder, output_filename)
-
-    file.save(input_path)
-
-    input_image = Image.open(input_path)
-
-    input_image.thumbnail((1024, 1024))
-
-    output_image = remove(input_image, session=session)
-
-    output_image.save(output_path)
-
-    return render_template(
-        "result.html",
-        original=file.filename,
-        processed=output_filename
-    )
-
-
-
-@app.route("/download/<filename>")
-def download(filename):
-    path = os.path.join(upload_folder, filename)
-    return send_file(path, as_attachment=True)
-
-
-@app.route("/uploads/<filename>")
-def static_uploads(filename):
-    return send_from_directory(upload_folder, filename)
-
-
-if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
-
-# from flask import Flask, render_template, request, send_file, send_from_directory
-# from rembg import remove
-# from PIL import Image
-# import os
-
-# app=Flask(__name__)
-
-# upload_folder = 'uploads'
-# os.makedirs(upload_folder, exist_ok=True)
-
-# @app.route('/')
-# def home():
-#     return render_template('index.html')
-
-# @app.route('/remove-bg', methods=['POST'])
 # def remove_bg():
+#     global session
+
+#     if session is None:
+#         session = new_session("u2netp")
+
 #     file = request.files["image"]
 
 #     input_path = os.path.join(upload_folder, file.filename)
 
 #     output_filename = f"output_{os.path.splitext(file.filename)[0]}.png"
-#     output_path = os.path.join(upload_folder, output_filename )
-    
+#     output_path = os.path.join(upload_folder, output_filename)
+
 #     file.save(input_path)
 
 #     input_image = Image.open(input_path)
-#     output_image = remove(input_image)
+
+#     input_image.thumbnail((1024, 1024))
+
+#     output_image = remove(input_image, session=session)
+
 #     output_image.save(output_path)
 
-#     # return send_file(output_path, as_attachment=True)
 #     return render_template(
-#         'result.html', 
-#         original=file.filename, 
+#         "result.html",
+#         original=file.filename,
 #         processed=output_filename
-#         )
+#     )
 
-# @app.route('/download/<filename>')
+
+
+# @app.route("/download/<filename>")
 # def download(filename):
 #     path = os.path.join(upload_folder, filename)
 #     return send_file(path, as_attachment=True)
 
-# @app.route('/uploads/<filename>')
+
+# @app.route("/uploads/<filename>")
 # def static_uploads(filename):
 #     return send_from_directory(upload_folder, filename)
 
-# if __name__ == '__main__':
-#     app.run(debug=True)
+
+# if __name__ == "__main__":
+#     port = int(os.environ.get("PORT", 5000))
+#     app.run(host="0.0.0.0", port=port)
+
