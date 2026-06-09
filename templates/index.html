@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Background Remover</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='style.css') }}"
+    />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&icon_names=upload"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <h1>Backgroud Remover</h1>
+      <p>Upload an image and remove the background instantly.</p>
+
+      <form action="/remove-bg" method="POST" enctype="multipart/form-data">
+        <div class="upload-box">
+          <input
+            type="file"
+            id="image"
+            name="image"
+            accept="image/*"
+            required
+          />
+          <label for="image" class="upload-label">
+            <span class="upload-icon"
+              ><span class="material-symbols-outlined"> upload </span></span
+            >
+            <span class="upload-text">Choose an image</span>
+            <span class="upload-subtext">PNG, JPG, JPEG</span>
+          </label>
+        </div>
+
+        <button type="submit">Remove Background</button>
+      </form>
+    </div>
+    <script>
+      const fileInput = document.getElementById("image");
+      const uploadText = document.querySelector(".upload-text");
+
+      fileInput.addEventListener("change", () => {
+        if (fileInput.files.length > 0) {
+          uploadText.textContent = fileInput.files[0].name;
+        }
+      });
+    </script>
+  </body>
+</html>
